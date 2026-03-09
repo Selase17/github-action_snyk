@@ -1,7 +1,7 @@
-
 {
-  "name": "github-actions-day4",
+  "name": "github-action_snyk",
   "version": "1.0.0",
+  "description": "",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,14 +9,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Getdzidon/github-actions-day4.git"
+    "url": "git+https://github.com/Selase17/github-action_snyk.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Getdzidon/github-actions-day4/issues"
+    "url": "https://github.com/Selase17/github-action_snyk/issues"
   },
-  "homepage": "https://github.com/Getdzidon/github-actions-day4#readme",
-  "description": ""
+  "homepage": "https://github.com/Selase17/github-action_snyk#readme"
 }

@@ -1,0 +1,31 @@
+# Workflow name displayed in GitHub Actions UI
+name: npm Audit Security Check
+
+# Trigger: runs on every push to any branch
+on: [push]
+
+jobs:
+  audit:
+    # Use latest Ubuntu runner
+    runs-on: ubuntu-latest
+    steps:
+      # Clone repository code into the runner
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      # Install Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'  # Specify Node.js version
+
+      - name: Generate package.json file
+        run: npm init -y  # Create a default package.json if it doesn't exist
+
+      # Install exact dependencies from package-lock.json (faster and more reliable than npm install)
+      - name: Install dependencies
+        run: npm ci
+
+      # Check for security vulnerabilities in dependencies; fails if low or higher severity issues found
+      - name: Run npm audit
+        run: npm audit --audit-level=high || exit 1
