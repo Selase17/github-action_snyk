@@ -1,5 +1,7 @@
+# Workflow to build Docker image, scan for vulnerabilities, push to ECR, and deploy to ECS
 name: Build, Scan with Trivy and Push image to AWS ECR, then deploy to ECS Fargate
 
+# Trigger: runs only on pushes to main branch
 on:
   push:
     branches:
@@ -7,12 +9,15 @@ on:
 
 jobs:
   deploy:
+    # Use latest Ubuntu runner
     runs-on: ubuntu-latest
 
     steps:
+    # Clone repository code into the runner
     - name: Checkout Code
       uses: actions/checkout@v6
 
+    # Configure AWS CLI with credentials from GitHub secrets
     - name: Set up AWS Credentials
       uses: aws-actions/configure-aws-credentials@v6
       with:
@@ -20,22 +25,26 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
+    # Authenticate Docker with Amazon ECR to enable push/pull operations
     - name: Log in to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
 
+    # Build Docker image and tag it with ECR repository URI
     - name: Build Docker image
       id: build-image
       run: |
         docker build -t ${{ secrets.ECR_REPOSITORY_URI }}:latest .
 
+    # Scan the built image for HIGH and CRITICAL vulnerabilities; fails workflow if found
     - name: Scan Docker image for vulnerabilities with Trivy
       uses: aquasecurity/trivy-action@0.33.1
       with:
-        image-ref: ${{ secrets.ECR_REPOSITORY_URI }}:latest
-        format: table
-        severity: HIGH,CRITICAL
+        image-ref: ${{ secrets.ECR_REPOSITORY_URI }}:latest  # Image to scan
+        format: table  # Output format for scan results
+        severity: HIGH,CRITICAL  # Only check for high and critical vulnerabilities
         exit-code: 1  # Fail the job if vulnerabilities are found
 
+    # Push the scanned image to ECR (only runs if scan passes)
     - name: Push Docker image to Amazon ECR
       run: |
         docker push ${{ secrets.ECR_REPOSITORY_URI }}:latest
