@@ -28,4 +28,4 @@ jobs:
 
       # Check for security vulnerabilities in dependencies; fails if low or higher severity issues found
       - name: Run npm audit
-        run: npm audit --audit-level=high || exit 1
+        run: npm audit --audit-level=low
