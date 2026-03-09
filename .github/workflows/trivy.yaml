@@ -1,0 +1,41 @@
+name: Build, Scan with Trivy and Push image to AWS ECR, then deploy to ECS Fargate
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v6
+
+    - name: Set up AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v6
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Log in to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build Docker image
+      id: build-image
+      run: |
+        docker build -t ${{ secrets.ECR_REPOSITORY_URI }}:latest .
+
+    - name: Scan Docker image for vulnerabilities with Trivy
+      uses: aquasecurity/trivy-action@0.33.1
+      with:
+        image-ref: ${{ secrets.ECR_REPOSITORY_URI }}:latest
+        format: table
+        severity: HIGH,CRITICAL
+        exit-code: 1  # Fail the job if vulnerabilities are found
+
+    - name: Push Docker image to Amazon ECR
+      run: |
+        docker push ${{ secrets.ECR_REPOSITORY_URI }}:latest
