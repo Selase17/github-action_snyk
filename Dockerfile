@@ -8,16 +8,16 @@ WORKDIR /app
 COPY package.json ./
 
 # Install dependencies
-RUN npm install --omit=dev
+RUN npm install --production
 
 # Copy application code
 COPY . .
 
+# Create uploads directory
+RUN mkdir -p uploads
+
 # Expose application port
 EXPOSE 3000
-
-# Run as non-root user for security
-USER node
 
 # Start the application
 CMD ["npm", "start"]
