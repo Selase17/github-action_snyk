@@ -33,16 +33,17 @@ jobs:
     - name: Build Docker image
       id: build-image
       run: |
-        docker build -t ${{ secrets.ECR_REPOSITORY_URI }}:latest .
+        docker build -t myapp:latest .
+        docker tag myapp:latest ${{ secrets.ECR_REPOSITORY_URI }}:latest
 
     # Scan the built image for HIGH and CRITICAL vulnerabilities; fails workflow if found
     - name: Scan Docker image for vulnerabilities with Trivy
       uses: aquasecurity/trivy-action@0.33.1
       with:
-        image-ref: ${{ secrets.ECR_REPOSITORY_URI }}:latest  # Image to scan
+        image-ref: myapp:latest  # Image to scan (local tag)
         format: table  # Output format for scan results
         severity: HIGH,CRITICAL  # Only check for high and critical vulnerabilities
-        exit-code: 0  # Fail the job if vulnerabilities are found
+        exit-code: 0  # Set to 1 to fail the job if vulnerabilities are found
 
     # Push the scanned image to ECR (only runs if scan passes)
     - name: Push Docker image to Amazon ECR
